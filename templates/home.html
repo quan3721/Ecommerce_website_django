@@ -1,0 +1,53 @@
+
+{% extends 'base.html' %} <!-- Exend file base.html -->
+{% load static %} <!-- Load Static folder -->
+
+
+{% block content %} <!-- Creat a block -->
+
+
+<!-- ========================= SECTION MAIN ========================= -->
+<section class="section-intro padding-y-sm">
+<div class="container">
+
+<div class="intro-banner-wrap">
+	<img src="{% static 'images/banners/2.jpg' %}" class="img-fluid rounded">
+</div>
+
+</div> <!-- container //  -->
+</section>
+<!-- ========================= SECTION MAIN END// ========================= -->
+
+<!-- ========================= SECTION  ========================= -->
+<section class="section-name padding-y-sm">
+<div class="container">
+
+<header class="section-heading">
+	<a href="{% url 'store' %}" class="btn btn-outline-primary float-right">See all</a> <!-- Dispplay store page when entering see all button -->
+	<h3 class="section-title">Popular products</h3>
+</header><!-- sect-heading -->
+
+	
+<div class="row">
+	<!-- using for loop to show all products -->
+	{% for product in products %}
+	<div class="col-md-3">
+		<div class="card card-product-grid">
+			<a href="{{ product.get_url }}" class="img-wrap"> <img src="{{ product.image.url }}"> </a> <!-- Display product image url and url about product detail -->
+			<figcaption class="info-wrap">
+				<a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a> <!-- Display product name and url about product detail -->
+				<div class="price mt-1">{{ product.price }}</div> <!-- Display product price -->
+			</figcaption>
+		</div>
+	</div> <!-- col.// -->
+	{% endfor %}
+
+</div>
+
+</div><!-- container // -->
+</section>
+<!-- ========================= SECTION  END// ========================= -->
+
+
+
+{% endblock %}
