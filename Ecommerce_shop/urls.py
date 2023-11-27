@@ -28,4 +28,7 @@ urlpatterns = [
     # store url #
     path('store/', include('store.urls')),
     
+    # cart url #
+    path('cart/', include('carts.urls')),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) # add media path 

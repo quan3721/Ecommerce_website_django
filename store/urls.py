@@ -19,8 +19,11 @@ from . import views
 
 urlpatterns = [
     path('', views.store, name='store'), # path url for store page
-    path('<slug:category_slug>/', views.store, name='products_by_category'), # path url for category in store page
+    path('category/<slug:category_slug>/', views.store, name='products_by_category'), # path url for category in store page
     
     # path for product #
-    path('<slug:category_slug>/<slug:product_slug>/', views.product_detail, name='product_detail'), # path url for product detail in store page
+    path('category/<slug:category_slug>/<slug:product_slug>/', views.product_detail, name='product_detail'), # path url for product detail in store page
+    
+    # path for search product #
+    path('search/', views.search, name='search'), # path url for searching
 ]

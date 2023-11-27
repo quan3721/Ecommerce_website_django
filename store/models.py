@@ -43,3 +43,49 @@ class Product(models.Model):
     # -- Display product name -- #
     def __str__(self):
         return self.product_name
+    
+
+# -- Create a class For managing size and color -- #
+class VariationManager(models.Manager):
+    
+    # -- For color -- #
+    def colors(self):
+        return super(VariationManager, self).filter(variation_category='color', is_active=True)
+
+    
+    # -- For size -- #
+    def sizes(self):
+        return super(VariationManager, self).filter(variation_category='size', is_active=True)
+
+
+
+variation_category_choice = (
+    ('color', 'color'), # the first "color" is the value, and the second "color" is the label (see in HTML)
+    ('size', 'size'), # the first "size" is the value, and the second "size" is the label (see in HTML)
+)
+
+
+# Product Variation Model #
+class Variation(models.Model):
+    
+    # -- Field for containing all information about product -- #
+    product = models.ForeignKey(Product, on_delete=models.CASCADE) # on_delete = models.CASCADE, nếu product bị xóa thì variation product cũng bị delete theo
+    
+    # -- Field for containing variation of product -- #
+    variation_category = models.CharField(max_length=100, choices=variation_category_choice)
+    
+    # -- Field for containing value of variation product -- #
+    variation_value = models.CharField(max_length=200)
+    
+     # -- Field to check variation product is active or not -- #
+    is_active = models.BooleanField(default=True) # default = True, mặc định : variation còn hàng
+    
+    # -- Field for containing the date created variation product -- #
+    created_date = models.DateTimeField(auto_now=True)
+    
+    # -- Manage Field in Model -- #
+    objects = VariationManager()
+    
+    # -- Display product -- #
+    def __str__(self):
+        return self.variation_value

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "category", # add folder app for category
     "accounts", # add folder app for account user
     "store", # add folder app for store
+    "carts", # add folder app for cart ( giỏ hàng )
 ]
 
 MIDDLEWARE = [
@@ -65,7 +66,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "category.context_processors.menu_links", # import function menu_links form category folder inside context_processors.py
+                "category.context_processors.menu_links", # import function menu_links folder inside context_processors.py from category
+                "carts.context_processors.counter", # import function counter inside context_processors.py from carts folder
             ],
         },
     },
