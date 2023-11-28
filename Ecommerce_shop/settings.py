@@ -138,3 +138,17 @@ MEIA_ROOT = BASE_DIR /'media'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# -- Message Django on Web -- #
+from django.contrib.messages import constants as messages
+
+MESSAGE_TAGS = {
+    messages.ERROR: "danger", # message for error
+}
+
+# SMTP configuration #
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'hongquan.xstadium@gmail.com'
+EMAIL_HOST_PASSWORD = 'trvy kjkr nboy wfel'
+EMAIL_USE_TLS = True
