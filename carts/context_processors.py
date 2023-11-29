@@ -10,7 +10,12 @@ def counter(request):
     else: # path is not current admin
         try:
             cart = Cart.objects.filter(cart_id=_cart_id(request)) # get cart
-            cart_items = CartItem.objects.all().filter(cart=cart[:1]) # get cart_items object but just only one
+            
+            if request.user.is_authenticated: # if user login
+                cart_items = CartItem.objects.all().filter(user=request.user)
+            else: # if user not login
+                cart_items = CartItem.objects.all().filter(cart=cart[:1]) # get cart_items object but just only one            
+           
             for cart_item in cart_items:
                 cart_count += cart_item.quantity # calculate total items in cart
         except Cart.DoesNotExist: # if Cart object does not exist

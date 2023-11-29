@@ -4,6 +4,9 @@ from .models import Account # import Account model
 from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
+from carts.views import _cart_id # import function _cart_id
+from carts.models import Cart, CartItem # import Cart and CartItem model
+import requests # must install library
 
 # Verification
 from django.contrib.sites.shortcuts import get_current_site
@@ -62,7 +65,7 @@ def register(request):
     return render(request, 'accounts/register.html', context)
 
 
-
+# -- Functio to login for User -- #
 def login(request):
     
     # -- check method of Form -- #
@@ -74,10 +77,83 @@ def login(request):
         user = auth.authenticate(email=email, password=password)
         
         if user is not None: # if user is valid
+            
+            # try - except block : to check if having item inside cart, so user can keep item into cart after login
+            try:
+                cart = Cart.objects.get(cart_id=_cart_id(request)) # get cart 
+                is_cart_item_exists = CartItem.objects.filter(cart=cart).exists() # check cart_item exist or not exist
+                # print(is_cart_item_exists)
+                if is_cart_item_exists: # if exsit
+                    cart_item_not_user = CartItem.objects.filter(cart=cart) # get cart_item
+                    # -- Fetch all item into user just login -- #
+                    
+                    # -- getting variation of product exist in user cart by cart_id -- #
+                    product_variation = [] # list contain variation product
+                    for item in cart_item_not_user:
+                        variaton = item.variations.all()
+                        product_variation.append(list(variaton)) # note: convert query set into list
+                    
+                        
+                    #  -- Get the cart items from the user to access his product variations  --  #    
+                    cart_item_user = CartItem.objects.filter(user=user) # get cart_item information following product added into cart            
+                    # existing_variations --> database
+                    # current variation --> product_variation list
+                    # item_id --> database
+                    ex_var_list = []
+                    id = []
+                    for item in cart_item_user:
+                        existing_variation = item.variations.all()
+                        ex_var_list.append(list(existing_variation)) # add variation to list, note: convert query set into list,
+                        id.append(item.id) # add id of item into list     
+                    # print(ex_var_list) # check list
+                    
+                    
+                    '''
+                        Loop for to check 'item inside cart when user does not login' with 'item inside cart when user logged in'
+                        If exist : increase the item quantity
+                        It not exist : create a new item for user cart 
+                        
+                    '''
+                    for pr in product_variation: 
+                        if pr in ex_var_list: # if ex_var_list has the value pr
+                            index = ex_var_list.index(pr)
+                            item_id = id[index] # get item id
+                            item = CartItem.objects.get(id=item_id)
+                            item.quantity += 1 # increase the cart item quantity
+                            item.user = user # get user for item
+                            item.save()
+                        else: # if not having
+                            cart_item = CartItem.objects.filter(cart=cart)
+                            # --  Just assign user for item  -- #
+                            for item in cart_item: 
+                                item.user = user
+                                item.save() 
+                                                      
+            except:
+                pass
+            
             auth.login(request, user)
             messages.success(request, 'You are now logged in.')
             # return redirect('home')
-            return redirect('daskboard')
+            
+            
+            # -- using requests library to get url -- #
+            url = request.META.get('HTTP_REFERER')
+            # check out or           
+            try: # check out
+                query = requests.utils.urlparse(url).query # get query on path url
+                print('query -> ', query) # next=/cart/checkout/
+                print('------')    
+                params = dict(x.split('=') for x in query.split('&'))
+                print('params -> ', params ) # {'next': '/cart/checkout/'}
+                
+                if 'next' in params: 
+                    nextPage = params['next']
+                    return redirect(nextPage)                
+            except: # login
+                return redirect('daskboard')
+            
+            
 
         else: # if user is invalid
             messages.error(request, 'Invalid login credentials')
