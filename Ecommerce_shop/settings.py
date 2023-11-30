@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "accounts", # add folder app for account user
     "store", # add folder app for store
     "carts", # add folder app for cart ( giỏ hàng )
+    "orders", # add folder app for orders
 ]
 
 MIDDLEWARE = [
