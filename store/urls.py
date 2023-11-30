@@ -26,4 +26,7 @@ urlpatterns = [
     
     # path for search product #
     path('search/', views.search, name='search'), # path url for searching
+    
+    # path for review and rating product #
+    path('submit_review/<int:product_id>/', views.submit_review, name='submit_review')
 ]

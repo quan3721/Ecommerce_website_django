@@ -1,6 +1,8 @@
 from django.db import models
 from category.models import Category # import Category model
 from django.urls import reverse # import reverse function ( reverse for url )
+from accounts.models import Account # import Account model
+from django.db.models import Avg, Count
 
 # Create your models here.
 
@@ -43,6 +45,22 @@ class Product(models.Model):
     # -- Display product name -- #
     def __str__(self):
         return self.product_name
+    
+    # -- average rating review -- #
+    def averageReview(self):
+        reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(average=Avg('rating'))
+        avg = 0
+        if reviews['average'] is not None:
+            avg = float(reviews['average'])
+        return avg
+    
+    # -- Count Rating Review -- #
+    def countReview(self):
+        reviews = ReviewRating.objects.filter(product=self, status=True).aggregate(count=Count('id'))
+        count = 0
+        if reviews['count'] is not None:
+            count = int(reviews['count'])
+        return count
     
 
 # -- Create a class For managing size and color -- #
@@ -89,3 +107,34 @@ class Variation(models.Model):
     # -- Display product -- #
     def __str__(self):
         return self.variation_value
+    
+    
+
+class ReviewRating(models.Model):
+    
+    # -- Field contain porduct need to review and rating -- #
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    
+    # -- Field contain the user review and raing product -- #
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    
+    # -- Field contain the subject of review and rating -- #
+    subject = models.CharField(max_length=100, blank=True)
+    
+    # -- Field contain the content of review -- #
+    review = models.TextField(max_length=500, blank=True)
+    
+    # -- Field contain the rating of product -- #
+    rating = models.FloatField()
+    
+    ip = models.CharField(max_length=20, blank=True)
+    
+    status = models.BooleanField(default=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # -- Display the content of subject -- #
+    def __str__(self):
+        return self.subject
