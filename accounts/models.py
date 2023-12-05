@@ -107,3 +107,36 @@ class Account(AbstractBaseUser):
     
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
+    
+
+
+
+# -- Create a Model for User Profile edit inside Dashboard -- #
+class UserProfile(models.Model):
+    
+    # Field contain user #
+    user = models.OneToOneField(Account, on_delete=models.CASCADE) # OnetoOneField : only have one profile user unique
+    
+    # Field contain address
+    address_line_1 = models.CharField(blank=True, max_length=100)
+    
+    address_line_2 = models.CharField(blank=True, max_length=100)
+    
+    # Field contain picture prodfile of user #
+    profile_picture = models.ImageField(blank=True, upload_to='userprofile')
+    
+    # Field city
+    city = models.CharField(blank=True, max_length=20)
+    # Field state
+    state = models.CharField(blank=True, max_length=20)
+    # Field country
+    country = models.CharField(blank=True, max_length=20)
+    
+    # -- Display first_name of user -- #
+    def __str__(self):
+        return self.user.first_name
+    
+    def full_address(self):
+        return f'{self.address_line_1} {self.address_line_2}'
+    
+    

@@ -1,12 +1,14 @@
-from django.shortcuts import render, redirect
-from .forms import RegistrationForm # import RegistrationForm class
-from .models import Account # import Account model
+from django.shortcuts import get_object_or_404, render, redirect
+from .forms import RegistrationForm, UserForm, UserProfileForm # import RegistrationForm, UserForm, UserProfileForm
+from .models import Account, UserProfile # import Account, UserProfile model
 from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from carts.views import _cart_id # import function _cart_id
 from carts.models import Cart, CartItem # import Cart and CartItem model
 import requests # must install library
+from orders.models import Order, OrderProduct # import Order model
+
 
 # Verification
 from django.contrib.sites.shortcuts import get_current_site
@@ -34,6 +36,12 @@ def register(request):
             user = Account.objects.create_user(first_name=first_name, last_name=last_name, email=email, username=username, password=password)           
             user.phone_number = phone_number
             user.save()
+            
+            # -- Create User Profile -- #
+            profile = UserProfile()
+            profile.user_id = user.id # get user field
+            profile.profile_picture = 'default/default-user.png'
+            profile.save()
             
             # -- User activation -- #
             current_site = get_current_site(request) # current site
@@ -199,8 +207,16 @@ def activate(request, uidb64, token):
 @login_required(login_url = 'login') # you must be logged in, so that you can have daskboard
 def daskboard(request):
     
+    orders = Order.objects.order_by('-created_at').filter(user_id = request.user.id, is_ordered=True)
+    order_count = orders.count() # count the number of order object by user
+    userprofile = UserProfile.objects.get(user_id=request.user.id)
     
-    return render(request, 'accounts/daskboard.html')
+    context = {
+        'order_count': order_count,
+        'userprofile': userprofile,
+    }
+    
+    return render(request, 'accounts/daskboard.html', context)
 
 
 
@@ -279,5 +295,98 @@ def resetPassword(request):
     else:        
         return render(request, 'accounts/resetPassword.html')
   
+   
+# -- function to show order in Dashboard of user -- # 
+@login_required(login_url='login') # -- user must login, then can see user's order
+def my_orders(request):
     
-     
+    orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at') # get order object
+    
+    context = {
+        'orders': orders,
+    }
+    
+    return render(request, 'accounts/my_orders.html', context)  
+
+
+# -- function to edit profile user in Dashboard -- # 
+@login_required(login_url='login') # -- user must login, then can edit your profile
+def edit_profile(request):
+    userprofile = get_object_or_404(UserProfile, user=request.user) # get user profile
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=request.user) # using instance to update, not create a new one
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=userprofile)
+        
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile has been updated')
+            return redirect('edit_profile')
+        
+    else:
+        user_form = UserForm(instance=request.user)
+        profile_form = UserProfileForm(instance=userprofile)
+    
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'userprofile': userprofile,
+    }
+    
+    return render(request, 'accounts/edit_profile.html', context)
+
+
+
+# -- Function to change Password for user inside Dashboard -- #
+@login_required(login_url='login') # -- user must login, then can change password
+def change_password(request):
+    
+    if request.method == 'POST':
+        current_password = request.POST['current_password']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['confirm_password']
+        
+        user = Account.objects.get(username__exact=request.user.username) # get user object
+        
+        if new_password == confirm_password:
+            success = user.check_password(current_password) # checck correct current_password
+            # print(success)
+            if success: # if true
+                user.set_password(new_password)
+                user.save()
+                
+                # auth.logout(request) # reset password then log out
+                
+                messages.success(request, 'Password updated successfully')
+                return redirect('change_password')
+
+            else: # if not correct
+                messages.error(request, 'Please enter valid current password')
+                return redirect('change_password')
+            
+        else:
+            messages.error(request, 'Password does not match!')
+            return redirect('change_password')
+            
+    return render(request, 'accounts/change_password.html')
+
+
+# -- Function to show the detail of user's order inside Dashboard -- #
+@login_required(login_url='login') # -- user must login, then can see the order detail
+def order_detail(request, order_id):
+    
+    order_detail = OrderProduct.objects.filter(order__order_number=order_id) # get order products following order id (order number)
+    order = Order.objects.get(order_number=order_id) # get order object
+    
+    sub_total = 0
+    for i in order_detail:
+        sub_total += i.product.price * i.quantity
+    
+    
+    context = {
+        'order_detail': order_detail,
+        'order': order,
+        'sub_total': sub_total,
+    }
+    
+    return render(request, 'accounts/order_detail.html', context)

@@ -14,5 +14,11 @@ urlpatterns = [
     path('forgotPassword/', views.forgotPassword, name='forgotPassword'), # url forgot Password page
     path('resetpassword_validate/<uidb64>/<token>/', views.resetpassword_validate, name='resetpassword_validate'), # url forgot Password validate page
     path('resetPassword/', views.resetPassword, name='resetPassword'), # url Password reset page
+    
+    path('my_orders/', views.my_orders, name='my_orders'), # url path for my orders in DashBoard
+    path('edit_profile/', views.edit_profile, name='edit_profile'), # url path for edit profile in DashBoard
+    path('change_password/', views.change_password, name='change_password'), # url path for change password in DashBoard
+    path('order_detail/<int:order_id>/', views.order_detail, name='order_detail'), # url path for order detail page in DashBoard
+
 
 ]

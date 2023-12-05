@@ -1,5 +1,5 @@
 from django import forms
-from .models import Account # import Account model
+from .models import Account, UserProfile # import Account and UserProfile models
 
 # -- Class Form for Register -- #
 class RegistrationForm(forms.ModelForm):
@@ -43,3 +43,43 @@ class RegistrationForm(forms.ModelForm):
             raise forms.ValidationError(
                 "Passowrd does not match."
             )
+            
+
+# -- Create a User Form to edit fields in Account model -- #
+class UserForm(forms.ModelForm):
+    
+    class Meta:
+        
+        model = Account
+        
+        fields = ['first_name', 'last_name', 'phone_number']
+        
+    # -- add CSS, Boostraps for all field -- #
+    def __init__(self, *args, **kwargs):
+        super(UserForm, self).__init__(*args, **kwargs)
+        
+        # add all field
+        for field in self.fields: 
+            self.fields[field].widget.attrs['class'] = 'form-control'
+
+        
+# -- Create a User Profile Form to edit fields in UserProfile model -- #        
+class UserProfileForm(forms.ModelForm):
+    
+    
+    profile_picture = forms.ImageField(required=False, error_messages={"invalid": ('Image files only')}, widget=forms.FileInput)
+    
+    class Meta:
+        
+        model = UserProfile
+        
+        fields = ['address_line_1', 'address_line_2', 'city', 'state', 'country', 'profile_picture']
+        
+        
+    # -- add CSS, Boostraps for all field -- #
+    def __init__(self, *args, **kwargs):
+        super(UserProfileForm, self).__init__(*args, **kwargs)
+        
+        # add all field
+        for field in self.fields: 
+            self.fields[field].widget.attrs['class'] = 'form-control'

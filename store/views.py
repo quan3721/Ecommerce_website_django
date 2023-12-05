@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q # import Q
 
-from .models import Product, ReviewRating # import Product and ReviewRating models
+from .models import Product, ReviewRating, ProductGallery # import Product, ReviewRating, ProductGallery models
 
 from category.models import Category # import Category model
 
@@ -86,7 +86,9 @@ def product_detail(request, category_slug, product_slug):
         
     # Get the reviews
     reviews = ReviewRating.objects.filter(product_id=single_product.id, status=True)
-        
+    
+    # Get the product gallery
+    product_gallery = ProductGallery.objects.filter(product_id=single_product.id)
         
     # -- Create a variable contain variable producs to display on product detail page -- #
     context = {
@@ -94,6 +96,7 @@ def product_detail(request, category_slug, product_slug):
         'in_cart': in_cart,
         'orderproduct': orderproduct,
         'reviews': reviews,
+        'product_gallery': product_gallery,
     }
     
     return render(request, "store/product_detail.html", context)
